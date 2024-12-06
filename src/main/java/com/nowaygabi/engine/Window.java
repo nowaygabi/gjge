@@ -16,7 +16,6 @@
 
 package com.nowaygabi.engine;
 
-import com.nowaygabi.engine.time.Time;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
@@ -69,7 +68,7 @@ public class Window {
     }
 
     public void run() {
-        System.out.println("Starting LWJGL...\nVersion: " + Version.getVersion());
+        logger.info("Starting LWJGL... Version: {}", Version.getVersion());
 
         init();
         loop();
