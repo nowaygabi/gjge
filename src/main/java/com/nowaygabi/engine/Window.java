@@ -16,9 +16,15 @@
 
 package com.nowaygabi.engine;
 
+import com.nowaygabi.engine.time.Time;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.nowaygabi.engine.input.KeyListener;
+import com.nowaygabi.engine.input.MouseListener;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
@@ -27,12 +33,20 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Window {
 
+    private static final Logger logger = LoggerFactory.getLogger(Window.class);
+
     private int width = 1600;
     private int height = 900;
     private String title = "Gjge (Gabi's Java Game Engine)";
     private long glfwWindow;
 
     private static Window instance = null;
+
+    private float r = 1f;
+    private float g = 1f;
+    private float b = 1f;
+    private float a = 1f;
+    private boolean fadeToBlack = false;
 
     private Window() {}
 
@@ -91,6 +105,14 @@ public class Window {
             throw new RuntimeException("Failed to create the GLFW window");
         }
 
+        // Mouse callbacks
+        glfwSetCursorPosCallback(glfwWindow, MouseListener::mousePosCallback);
+        glfwSetMouseButtonCallback(glfwWindow, MouseListener::mouseButtonCallback);
+        glfwSetScrollCallback(glfwWindow, MouseListener::mouseScrollCallback);
+
+        // Keyboard callbacks
+        glfwSetKeyCallback(glfwWindow, KeyListener::keyCallback);
+
         // Make the OpenGL context current
         glfwMakeContextCurrent(glfwWindow);
 
@@ -109,8 +131,18 @@ public class Window {
             // Poll Events
             glfwPollEvents();
 
-            glClearColor(1f, 0f, 0f, 1f);
+            glClearColor(r, g, b, a);
             glClear(GL_COLOR_BUFFER_BIT);
+
+            if (fadeToBlack) {
+                r = Math.max(r - 0.01f, 0f);
+                g = Math.max(g - 0.01f, 0f);
+                b = Math.max(b - 0.01f, 0f);
+            }
+
+            if (KeyListener.isKeyPressed(GLFW_KEY_SPACE)) {
+                fadeToBlack = true;
+            }
 
             glfwSwapBuffers(glfwWindow);
         }
